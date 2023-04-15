@@ -9,9 +9,10 @@ module Pleco.Gen.Flashcards (
     -- * Assembly
   , listUnder
   , group
-    -- * Queries
-  , numCategories
-  , numCards
+    -- * Statistics
+  , Stats(..)
+  , computeStats
+  , showStats
     -- * Serialization
   , serialize
   ) where
@@ -34,13 +35,14 @@ newtype Flashcards = Flashcards {
 --
 -- NOTE: Pleco only allows 3 levels, but we do not enforce that here.
 newtype Category = Category [String]
-  deriving (Eq, Ord)
+  deriving (Show, Eq, Ord)
 
 -- | Individual flash card
 --
 -- The Pleco format also allows flashcards to contain pinyin pronunciation and
 -- definitions, but we (currently) do not support these here.
 data Flashcard = Flashcard Char
+  deriving (Show, Eq, Ord)
 
 below :: Category -> Category -> Category
 below (Category main) (Category sub) = Category (main ++ sub)
@@ -75,14 +77,45 @@ group cats =
         go (Map.alter (Just . (card:) . fromMaybe []) cat acc) cards
 
 {-------------------------------------------------------------------------------
-  Queries
+  Statistics
 -------------------------------------------------------------------------------}
 
-numCategories :: Flashcards -> Word
-numCategories (Flashcards cards) = fromIntegral . length $ cards
+data Stats = Stats {
+      numCategories    :: Word
+    , numCards         :: Word
+    , countPerCategory :: [(Category, Word)]
+    , dups             :: [Flashcard]
+    }
+  deriving (Show)
 
-numCards :: Flashcards -> Word
-numCards (Flashcards cards) = fromIntegral . length . concatMap snd $ cards
+computeStats :: Flashcards -> Stats
+computeStats (Flashcards cards) = Stats {
+      numCategories    = fromIntegral . length $ cards
+    , numCards         = fromIntegral . length . concatMap snd $ cards
+    , countPerCategory = map (second (fromIntegral . length)) cards
+    , dups             = computeDups $ concatMap snd cards
+    }
+  where
+    computeDups :: [Flashcard] -> [Flashcard]
+    computeDups =
+          Map.keys
+        . Map.filter (> 1)
+        . Map.unionsWith (+)
+        . map (\c -> Map.singleton c (1 :: Word))
+
+showStats :: Stats -> String
+showStats stats = intercalate "\n" [
+      "Number of categories: " ++ show (numCategories stats)
+    , "Total number of cards: " ++ show (numCards stats)
+    , "Count per category:"
+    , intercalate "\n" [
+          "  " ++ serializeCatHeader cat ++ ": " ++ show count
+        | (cat, count) <- countPerCategory stats
+        ]
+    , case dups stats of
+        [] -> "No duplicates"
+        _  -> "Duplicates: " ++ show (dups stats)
+    ]
 
 {-------------------------------------------------------------------------------
   Serialization

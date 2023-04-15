@@ -5,7 +5,6 @@ import Pleco.Gen.Convert
 import Pleco.Gen.Convert.PerChapter qualified as PerChapter
 import Pleco.Gen.Flashcards (Flashcards)
 import Pleco.Gen.Flashcards qualified as Flashcards
-import Data.List (intercalate)
 
 main :: IO ()
 main = do
@@ -28,11 +27,5 @@ runConversion inp out conv = do
         putStrLn $ "Error on line " ++ show lineNo ++ ": "++ err
       Right cards -> do
         writeFile out $ Flashcards.serialize cards
-        putStrLn $ intercalate " " [
-            "Wrote"
-          , show $ Flashcards.numCards cards
-          , "cards in"
-          , show $ Flashcards.numCategories cards
-          , "categories."
-          ]
-        putStrLn $ "Statistics: " ++ show stats
+        putStrLn $ Flashcards.showStats $ Flashcards.computeStats cards
+        putStrLn $ "Additional statistics: " ++ show stats
