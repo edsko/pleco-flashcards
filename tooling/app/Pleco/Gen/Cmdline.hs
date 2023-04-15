@@ -22,6 +22,7 @@ data Cmd =
 
 data ConversionOptions = ConversionOptions {
       mainCategory :: Category
+    , forceSingleCharacterSet :: Bool
     }
 
 {-------------------------------------------------------------------------------
@@ -70,6 +71,10 @@ parseConversionOptions :: Parser ConversionOptions
 parseConversionOptions =
         ConversionOptions
     <$> parseCategory
+    <*> (switch $ mconcat [
+            long "force-single-character-set"
+          , help "Pretend that this character is the same in both simplified and traditional"
+          ])
 
 parseCategory :: Parser Category
 parseCategory = option (Category . (:[]) <$> str) $ mconcat [
