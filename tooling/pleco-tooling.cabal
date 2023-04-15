@@ -1,0 +1,29 @@
+cabal-version:      3.0
+name:               pleco-tooling
+version:            0.1.0
+synopsis:           Tooling for Pleco flashcards
+homepage:           https://github.com/edsko/pleco-flashcards
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Edsko de Vries
+maintainer:         edsko@well-typed.com
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common lang
+  ghc-options:
+      -Wall
+  build-depends:
+      base >= 4.16
+  default-language:
+      GHC2021
+
+executable pleco-tooling
+  import:
+      lang
+  main-is:
+      Main.hs
+  hs-source-dirs:
+      app
+  build-depends:
+      optparse-applicative
