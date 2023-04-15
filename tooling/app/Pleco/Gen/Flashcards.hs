@@ -14,10 +14,13 @@ module Pleco.Gen.Flashcards (
   , computeStats
   , showStats
     -- * Serialization
-  , serialize
+  , Serializer(..)
+  , defaultSerializer
+  , mkSerializer
   ) where
 
 import Data.Bifunctor
+import Data.Function (fix)
 import Data.List (intercalate)
 import Data.Map (Map)
 import Data.Map qualified as Map
@@ -109,7 +112,7 @@ showStats stats = intercalate "\n" [
     , "Total number of cards: " ++ show (numCards stats)
     , "Count per category:"
     , intercalate "\n" [
-          "  " ++ serializeCatHeader cat ++ ": " ++ show count
+          "  " ++ serializeHeader defaultSerializer cat ++ ": " ++ show count
         | (cat, count) <- countPerCategory stats
         ]
     , case dups stats of
@@ -121,19 +124,28 @@ showStats stats = intercalate "\n" [
   Serialization
 -------------------------------------------------------------------------------}
 
-serialize :: Flashcards -> String
-serialize (Flashcards cats) =
-      unlines
-    . map (uncurry serializeCat)
-    $ cats
+data Serializer = Serializer {
+      serializeFlashcards :: Flashcards -> String
+    , serializeCategory   :: Category -> [Flashcard] -> String
+    , serializeHeader     :: Category -> String
+    , serializeCard       :: Flashcard -> String
+    }
 
-serializeCat :: Category -> [Flashcard] -> String
-serializeCat cat cards = intercalate "\n" $
-      serializeCatHeader cat
-    : map serializeCard cards
+defaultSerializer :: Serializer
+defaultSerializer = fix mkSerializer
 
-serializeCard :: Flashcard -> String
-serializeCard (Flashcard c) = [c]
-
-serializeCatHeader :: Category -> String
-serializeCatHeader (Category cs) = "//" ++ intercalate "/" cs
+mkSerializer :: Serializer -> Serializer
+mkSerializer self = Serializer {
+      serializeFlashcards = \(Flashcards cats) ->
+          unlines
+        . map (uncurry $ serializeCategory self)
+        $ cats
+    , serializeCategory = \cat cards ->
+        intercalate "\n" $
+            serializeHeader self cat
+          : map (serializeCard self) cards
+    , serializeHeader = \(Category cs) ->
+        "//" ++ intercalate "/" cs
+    , serializeCard = \(Flashcard c) ->
+        [c]
+    }
