@@ -1,6 +1,7 @@
 module Pleco.Gen.Cmdline (
     Cmdline(..)
   , Cmd(..)
+  , ConversionOptions(..)
   , getCmdline
   ) where
 
@@ -17,7 +18,11 @@ data Cmdline = Cmdline {
     }
 
 data Cmd =
-    ConvertPerChapter FilePath FilePath Category
+    ConvertPerChapter FilePath FilePath ConversionOptions
+
+data ConversionOptions = ConversionOptions {
+      mainCategory :: Category
+    }
 
 {-------------------------------------------------------------------------------
   Top-level
@@ -39,19 +44,13 @@ parseCmd :: Parser Cmd
 parseCmd = subparser $ mconcat [
       sub
         "convert-per-chapter"
-        (parseConvert ConvertPerChapter <*> parseCategory)
+        (parseConvert ConvertPerChapter <*> parseConversionOptions)
         "Convert from per-chapter format"
     ]
   where
     sub :: String -> Parser a -> String -> Mod CommandFields a
     sub cmd parser desc =
         command cmd $ info (parser <**> helper) (progDesc desc)
-
-parseCategory :: Parser Category
-parseCategory = option (Category . (:[]) <$> str) $ mconcat [
-      long "category"
-    , help "Label for the top-level category"
-    ]
 
 parseConvert :: (FilePath -> FilePath -> a) -> Parser a
 parseConvert cmd =
@@ -66,6 +65,17 @@ parseConvert cmd =
           , metavar "PATH"
           , help "Output file"
           ])
+
+parseConversionOptions :: Parser ConversionOptions
+parseConversionOptions =
+        ConversionOptions
+    <$> parseCategory
+
+parseCategory :: Parser Category
+parseCategory = option (Category . (:[]) <$> str) $ mconcat [
+      long "category"
+    , help "Label for the top-level category"
+    ]
 
 
 
