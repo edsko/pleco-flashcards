@@ -13,17 +13,32 @@ extra-doc-files:    CHANGELOG.md
 common lang
   ghc-options:
       -Wall
+      -Wredundant-constraints
+      -Wprepositive-qualified-module
   build-depends:
       base >= 4.16
   default-language:
       GHC2021
+  default-extensions:
+      DerivingStrategies
 
-executable pleco-tooling
+executable genpleco
   import:
       lang
   main-is:
-      Main.hs
+      GenPleco.hs
   hs-source-dirs:
       app
+  ghc-options:
+      -main-is GenPleco
+  other-modules:
+      Pleco.Gen.Cmdline
+      Pleco.Gen.Convert
+      Pleco.Gen.Convert.PerChapter
+      Pleco.Gen.Flashcards
   build-depends:
-      optparse-applicative
+    , containers
+    , mtl >= 2.3.1
+    , transformers >= 0.5.6.2
+    , optparse-applicative
+
