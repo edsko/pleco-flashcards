@@ -1,14 +1,18 @@
-module Pleco.Gen.Convert.PerChapter (convert) where
+module Pleco.Gen.Convert.PerLesson (convert) where
 
 import Control.Monad.Except
 import Data.Bifunctor
-import Text.Read
-
-import Pleco.Gen.Convert
-import Pleco.Gen.Flashcards (Flashcards(..), Category(..), Flashcard(..))
 import Data.Set (Set)
 import Data.Set qualified as Set
+import Text.Read (readMaybe)
+
+import Pleco.Gen.Convert
+import Pleco.Gen.Flashcards (Flashcards(..), Flashcard(..), Category(..))
 import Pleco.Gen.Flashcards qualified as Flashcards
+
+{-------------------------------------------------------------------------------
+  Top-level pipeline
+-------------------------------------------------------------------------------}
 
 convert :: String -> Convert () NoStats Flashcards
 convert =
@@ -20,12 +24,20 @@ convert =
     . numberLines
     . lines
 
+{-------------------------------------------------------------------------------
+  Convert each line
+-------------------------------------------------------------------------------}
+
 convertLine :: LineNo -> [String] -> Convert State NoStats (Lesson, Flashcard)
 convertLine _ [[ch], l] | Just lesson <- readMaybe l = do
    modify $ \st@State{lessons} -> st{lessons = Set.insert lesson lessons}
    return (lesson, Flashcard ch)
 convertLine lineNo _ =
    throwError $ Error lineNo "Unexpected input"
+
+{-------------------------------------------------------------------------------
+  Process final results
+-------------------------------------------------------------------------------}
 
 process :: State -> [(Lesson, Flashcard)] -> Flashcards
 process State{lessons} cards =
@@ -35,6 +47,10 @@ process State{lessons} cards =
   where
     toCategory :: Lesson -> Category
     toCategory l = Category ["Lesson " ++ show l]
+
+{-------------------------------------------------------------------------------
+  State
+-------------------------------------------------------------------------------}
 
 type Lesson = Word
 

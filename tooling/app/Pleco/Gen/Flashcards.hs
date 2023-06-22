@@ -1,6 +1,9 @@
 -- | Definition of the Pleco flashcards format
 --
 -- Intended for qualified import.
+--
+-- > import Pleco.Gen.Flashcards (Flashcards(..), Flashcard(..), Category(..))
+-- > import Pleco.Gen.Flashcards qualified as Flashcards
 module Pleco.Gen.Flashcards (
     -- * Definition
     Flashcards(..)

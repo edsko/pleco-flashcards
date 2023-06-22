@@ -18,7 +18,8 @@ data Cmdline = Cmdline {
     }
 
 data Cmd =
-    ConvertPerChapter FilePath FilePath ConversionOptions
+    ConvertPerLesson FilePath FilePath ConversionOptions
+  | ConvertEnumByLesson FilePath FilePath ConversionOptions
 
 data ConversionOptions = ConversionOptions {
       mainCategory :: Category
@@ -44,9 +45,13 @@ parseCmdline =
 parseCmd :: Parser Cmd
 parseCmd = subparser $ mconcat [
       sub
-        "convert-per-chapter"
-        (parseConvert ConvertPerChapter <*> parseConversionOptions)
-        "Convert from per-chapter format"
+        "convert-perlesson"
+        (parseConvert ConvertPerLesson <*> parseConversionOptions)
+        "Convert from .perlesson format"
+    , sub
+        "convert-enumbylesson"
+        (parseConvert ConvertEnumByLesson <*> parseConversionOptions)
+        "Convert from .enumbylesson format"
     ]
   where
     sub :: String -> Parser a -> String -> Mod CommandFields a

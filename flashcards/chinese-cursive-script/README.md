@@ -28,8 +28,8 @@ against the character listing in the book):
 
 ```
 cabal run genpleco -- \
-  convert-per-chapter \
-  --in ../chinese-cursive-script/chinese-cursive-script.perlesson \
-  --out ../chinese-cursive-script/chinese-cursive-script.pleco \
+  convert-perlesson \
+  --in ../flashcards/chinese-cursive-script/chinese-cursive-script.perlesson \
+  --out ../flashcards/chinese-cursive-script/chinese-cursive-script.pleco \
   --category 'Chinese Cursive Script'
 ```
