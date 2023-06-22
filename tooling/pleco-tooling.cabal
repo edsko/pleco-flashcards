@@ -35,7 +35,8 @@ executable genpleco
   other-modules:
       Pleco.Gen.Cmdline
       Pleco.Gen.Convert
-      Pleco.Gen.Convert.PerChapter
+      Pleco.Gen.Convert.EnumByLesson
+      Pleco.Gen.Convert.PerLesson
       Pleco.Gen.Flashcards
   build-depends:
     , containers

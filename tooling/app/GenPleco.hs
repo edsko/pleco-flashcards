@@ -4,7 +4,8 @@ import Data.Function (fix)
 
 import Pleco.Gen.Cmdline
 import Pleco.Gen.Convert
-import Pleco.Gen.Convert.PerChapter qualified as PerChapter
+import Pleco.Gen.Convert.EnumByLesson qualified as EnumByLesson
+import Pleco.Gen.Convert.PerLesson qualified as PerLesson
 import Pleco.Gen.Flashcards (Flashcards, Flashcard (..))
 import Pleco.Gen.Flashcards qualified as Flashcards
 
@@ -12,8 +13,10 @@ main :: IO ()
 main = do
     Cmdline{cmd} <- getCmdline
     case cmd of
-      ConvertPerChapter inp out options ->
-        runConversion inp out options $ PerChapter.convert
+      ConvertPerLesson inp out options ->
+        runConversion inp out options $ PerLesson.convert
+      ConvertEnumByLesson inp out options ->
+        runConversion inp out options $ EnumByLesson.convert
 
 runConversion ::
      (Monoid w, Show w)
